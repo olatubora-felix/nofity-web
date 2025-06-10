@@ -1,15 +1,17 @@
 import { useState } from "react";
 import Modal from "../Modal";
 import { v4 as uuidv4 } from "uuid";
-import type { Note } from "../../constant/notes";
 const initialState = {
   title: "",
   content: "",
 };
-const AddNote = ({ handleNote }: AddNoteProps) => {
+
+type Status = "idle" | "loading" | "error" | "success";
+const AddNote = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [values, setValues] = useState(initialState);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
+  const [status, setStatus] = useState<Status>("idle");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -19,28 +21,55 @@ const AddNote = ({ handleNote }: AddNoteProps) => {
       ...prev,
       [name]: value,
     }));
-    setError(false);
+    setError("");
   };
 
   const toggleModal = () => {
     setIsOpen((prev) => !prev);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const { title, content } = values;
     if (!title.trim() || !content.trim()) {
-      return setError(true);
+      return setError("Title or content cannot be empty");
     }
-    handleNote({
-      title,
-      content,
-      id: uuidv4(),
-      createdAt: new Date().toISOString(),
-    });
-    setValues(initialState);
-    setError(false);
-    setIsOpen(false);
+    setStatus("loading");
+    try {
+      const res = await fetch("http://localhost:3001/notes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          content,
+          id: uuidv4(),
+          createdAt: new Date().toISOString(),
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to add note");
+      }
+      setStatus("success");
+      setValues(initialState);
+      setError("");
+      setIsOpen(false);
+      window.location.reload();
+      // handleNote(data); // Assuming handleNote is passed as a prop
+    } catch (error) {
+      console.error("Error adding note:", error);
+      setStatus("error");
+      setError("Failed to add note");
+    }
+
+    // handleNote({
+    //   title,
+    //   content,
+    //   id: uuidv4(),
+    //   createdAt: new Date().toISOString(),
+    // });
   };
   return (
     <>
@@ -56,7 +85,7 @@ const AddNote = ({ handleNote }: AddNoteProps) => {
         <form className="space-y-4" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-200 py-2 px-4 text-center rounded-lg">
-              <p className="text-red-500">Title or content cannot be empty</p>
+              <p className="text-red-500">{error}</p>
             </div>
           )}
           <div className="grid gap-2">
@@ -83,8 +112,11 @@ const AddNote = ({ handleNote }: AddNoteProps) => {
               value={values.content}
             ></textarea>
           </div>
-          <button className="bg-gradient-to-br from-orange-600 to-orange-500 text-white py-2 px-4 rounded-lg shadow-lg hover:from-orange-700 hover:to-orange-600 transition duration-300 h-[52px] w-full">
-            Submit
+          <button
+            className="bg-gradient-to-br from-orange-600 to-orange-500 text-white py-2 px-4 rounded-lg shadow-lg hover:from-orange-700 hover:to-orange-600 transition duration-300 h-[52px] w-full"
+            disabled={status === "loading"}
+          >
+            {status === "loading" ? "Adding..." : "Add Note"}
           </button>
         </form>
       </Modal>
@@ -93,7 +125,3 @@ const AddNote = ({ handleNote }: AddNoteProps) => {
 };
 
 export default AddNote;
-
-interface AddNoteProps {
-  handleNote: (note: Note) => void;
-}

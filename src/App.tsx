@@ -1,14 +1,14 @@
-import { useState } from "react";
+// import { useState } from "react";
 import AddNote from "./components/notes/AddNote";
 import NotesList from "./components/notes/NotesList";
-import { notesList, type Note } from "./constant/notes";
+// import { notesList, type Note } from "./constant/notes";
 
 const App = () => {
-  const [notes, setNotes] = useState<Note[] | []>(notesList);
+  // const [notes, setNotes] = useState<Note[] | []>(notesList);
 
-  const handleNote = (note: Note) => {
-    setNotes((noteItem) => [note, ...noteItem]);
-  };
+  // const handleNote = (note: Note) => {
+  //   setNotes((noteItem) => [note, ...noteItem]);
+  // };
 
   return (
     <main className="bg-gray-300  min-h-screen">
@@ -18,8 +18,8 @@ const App = () => {
         </h2>
       </div>
       <div className="container mx-auto p-4">
-        <AddNote handleNote={handleNote} />
-        <NotesList notes={notes} />
+        <AddNote />
+        <NotesList />
       </div>
     </main>
   );
