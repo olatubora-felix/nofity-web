@@ -9,7 +9,7 @@ import useGetNotes from "../../hooks/useGetNotes";
 const NotesList = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<Note | null>(null);
-  const { deleteNote, status: deleteStatus } = useDeleteNote();
+  const { deleteNote, isPending } = useDeleteNote();
   const { notes, status, error } = useGetNotes();
 
   const handleEdit = (note: Note) => {
@@ -19,19 +19,19 @@ const NotesList = () => {
   return (
     <>
       <section>
-        {status === "loading" && (
+        {status === "pending" && (
           <div className="flex justify-center items-center py-4">
             <p className="text-gray-500">Loading notes...</p>
           </div>
         )}
         {status === "error" && (
           <div className="flex justify-center items-center py-4 bg-white shadow-md rounded-md my-4 max-w-xl mx-auto">
-            <p className="text-red-500 text-xl font-bold">{error}</p>
+            <p className="text-red-500 text-xl font-bold">{error?.message}</p>
           </div>
         )}
         <div className="py-10 grid md:grid-cols-2 md:gap-6">
           {notes.length > 0 &&
-            notes.map((note) => (
+            notes.map((note: Note) => (
               <div
                 key={note.id}
                 className="bg-white shadow-sm rounded-md p-4 mb-4 shadow-orange-500"
@@ -39,7 +39,7 @@ const NotesList = () => {
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="text-xl font-semibold mb-2">{note.title}</h3>
                   <div className="flex items-center gap-2">
-                    {deleteStatus === "loading" ? (
+                    {isPending ? (
                       <span>Loading...</span>
                     ) : (
                       <Trash2

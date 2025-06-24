@@ -1,34 +1,44 @@
-import { useState } from "react";
+// import { useState } from "react";
+import { AxiosInstance } from "../libs/axiosInstance";
+import toast from "react-hot-toast";
+import { useMutation } from "@tanstack/react-query";
 
 const useDeleteNote = () => {
-  const [status, setStatus] = useState<Status>("idle");
-  const [error, setError] = useState<string>("");
+  // const [status, setStatus] = useState<Status>("idle");
+  // const [error, setError] = useState<string>("");
 
-  const deleteNote = async (id: number | string) => {
-    setStatus("loading");
-    try {
-      const res = await fetch(`http://localhost:3001/notes/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+  // const deleteNote = async (id: number | string) => {
+  //   setStatus("loading");
+  //   try {
+  //     await AxiosInstance.delete(`/notes/${id}`);
+  //     toast.success("Note deleted successfully");
+  //     setStatus("success");
+  //     setError("");
+  //   } catch (error) {
+  //     console.error(error);
+  //     setError((error as Error).message);
+  //     setStatus("error");
+  //   }
+  // };
 
-      if (!res.ok) {
-        throw new Error("Failed to delete note");
-      }
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (id: number | string) => {
+      if (!id) return;
+      const { data } = await AxiosInstance.delete(`/notes/${id}`);
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Note deleted successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete note: ${error.message}`);
+    },
+  });
 
-      setStatus("success");
-      setError("");
-    } catch (error) {
-      console.error(error);
-      setError((error as Error).message);
-      setStatus("error");
-    }
+  return {
+    deleteNote: mutate,
+    isPending,
   };
-
-  return { deleteNote, status, error };
 };
 
 export default useDeleteNote;
-type Status = "idle" | "loading" | "error" | "success";

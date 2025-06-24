@@ -1,15 +1,8 @@
 // import { useState } from "react";
 import AddNote from "./components/notes/AddNote";
 import NotesList from "./components/notes/NotesList";
-// import { notesList, type Note } from "./constant/notes";
 
 const App = () => {
-  // const [notes, setNotes] = useState<Note[] | []>(notesList);
-
-  // const handleNote = (note: Note) => {
-  //   setNotes((noteItem) => [note, ...noteItem]);
-  // };
-
   return (
     <main className="bg-gray-300  min-h-screen">
       <div className="flex justify-center items-center py-4">
